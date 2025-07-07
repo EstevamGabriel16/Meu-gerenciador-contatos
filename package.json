@@ -1,0 +1,23 @@
+{
+  "name": "meu-gerenciador-contatos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EstevamGabriel16/Meu-gerenciador-contatos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EstevamGabriel16/Meu-gerenciador-contatos/issues"
+  },
+  "homepage": "https://github.com/EstevamGabriel16/Meu-gerenciador-contatos#readme",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
