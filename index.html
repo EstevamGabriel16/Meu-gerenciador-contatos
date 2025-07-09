@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Agenda de Contatos</title>
+</head>
+
+<body>
+    <main>
+        <h1>Agenda de Contatos</h1>
+
+        <section class="controle">
+            <button id="btn-novo">+ Novo</button>
+        </section>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Contato</th>
+                    <th>Status</th>
+                    <th>Ações</th> <!-- Coluna nova -->
+                </tr>
+            </thead>
+            <tbody id="tabela-contatos">
+                <!-- Contatos vão aparecer aqui -->
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Modal do formulário -->
+    <div id="form-modal" class="modal oculto">
+        <form id="form-contato">
+            <h2>Novo Contato</h2>
+
+            <label for="nomo">Nome:</label>
+            <input type="text" id="nomo" required />
+
+            <label for="contato">Contato:</label>
+            <input type="text" id="contato" required />
+
+            <label for="status">Status:</label>
+            <select id="status" required>
+                <option value="Concluído">✅ Desbloqueado</option>
+                <option value="Bloqueado">🔒 Bloqueado</option>
+            </select>
+
+            <div style="margin-top: 15px;">
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancelar">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="/dist/main.js"></script>
+</body>
+
+</html>
