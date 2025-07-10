@@ -10,19 +10,18 @@ class Contato {
         this.status = status;
     }
 }
-// Array para armazenar todos os contatos (bloqueados e desbloqueados juntos)
+// Array para armazenar todos os contatos 
 let contatos = [];
-// Índice para controlar se estamos editando algum contato (null se for novo)
-let indiceEditando = null;
-// Pegando elementos do HTML pelo ID
-const form = document.getElementById("form-contato");
-const inputNome = document.getElementById("nomo");
-const inputContato = document.getElementById("contato");
-const selectStatus = document.getElementById("status");
-const modal = document.getElementById("form-modal");
-const btnNovo = document.getElementById("btn-novo");
-const btnCancelar = document.getElementById("btn-cancelar");
-const tabela = document.getElementById("tabela-contatos");
+// Índice para controlar se estamos editando algum contato 
+let indiceEditando = null; // null e se for novo
+const form = document.getElementById("form-contato"); // Pegando o formulário onde o usuário vai digitar os dados do contato
+const inputNome = document.getElementById("nomo"); // Pegando o campo de texto para o nome do contato
+const inputContato = document.getElementById("contato"); // Pegando o campo de texto para o telefone ou email do contato
+const selectStatus = document.getElementById("status"); // Pegando o campo seletor para o status do contato (Bloqueado ou Desbloqueado)
+const modal = document.getElementById("form-modal"); // Pegando o modal (janela que aparece para adicionar/editar contato)
+const btnNovo = document.getElementById("btn-novo"); // Pegando o botão "+ Novo" que abre o formulário para adicionar contato novo
+const btnCancelar = document.getElementById("btn-cancelar"); // Pegando o botão "Cancelar" dentro do formulário para fechar o modal sem salvar
+const tabela = document.getElementById("tabela-contatos"); // Pegando o corpo da tabela onde os contatos serão listados (elemento <tbody>)
 // Ao clicar no botão "Novo", abrir o modal para adicionar contato novo
 btnNovo.addEventListener("click", () => {
     indiceEditando = null; // Não estamos editando ninguém
@@ -51,9 +50,22 @@ form.addEventListener("submit", (e) => {
     const novoContato = new Contato(nome, contato, status);
     // Se estiver adicionando (não editando)
     if (indiceEditando === null) {
-        contatos.push(novoContato); // Adiciona contato novo no array
+        //verificar se já existe um contato com o mesmo número
+        const numeroJaExiste = contatos.some(c => c.contato === contato);
+        if (numeroJaExiste) {
+            alert('Este número já está cadastrado!');
+            return;
+        }
+        //Adiciona o novo contato na array
+        contatos.push(novoContato);
     }
     else {
+        //atualizar o proprio numero mesmo que seja igual
+        const numeroJaExiste = contatos.some((c, i) => c.contato === contato && i !== indiceEditando);
+        if (numeroJaExiste) {
+            alert('Este número já está cadastrado em outro contato!');
+            return;
+        }
         contatos[indiceEditando] = novoContato; // Atualiza contato existente
         indiceEditando = null; // Limpa índice edição
     }
