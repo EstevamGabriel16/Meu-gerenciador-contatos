@@ -152,3 +152,4 @@ function carregarDoLocalStorage(): void {
 // Ao carregar a página, carrega os contatos e atualiza a tabela
 carregarDoLocalStorage();
 atualizarTabela();
+ 

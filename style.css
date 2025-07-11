@@ -208,3 +208,16 @@ td button {
 .apagar:hover {
   background-color: #ffb3b3;
 }
+
+.pesquisa {
+    margin: 20px 0;
+
+}
+
+#barra-pesquisa {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
