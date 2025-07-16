@@ -112,8 +112,17 @@ function apagarContato(i) {
 // Barra de pesquisa
 if (busca) {
     busca.oninput = () => {
-        const termo = busca.value.toLowerCase();
-        atualizarTabela(contatos.filter(c => c.nome.toLowerCase().includes(termo)));
+        const termo = busca.value.toLowerCase().trim();
+        if (!termo) {
+            atualizarTabela();
+            return;
+        }
+        const resultados = contatos.filter(c => c.nome.toLowerCase().includes(termo) || // pesquisa por nome
+            c.contato.includes(termo) || // pesquisa por telefone/WhatsApp
+            c.email.toLowerCase().includes(termo) // pesquisa por e‑mail  
+            || c.status.toLowerCase().includes(termo) // pesquisa por status
+        );
+        atualizarTabela(resultados);
     };
 }
 // ------------ Inicialização ---------------
