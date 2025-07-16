@@ -1,134 +1,121 @@
 "use strict";
 // Classe que representa um contato
 class Contato {
-    constructor(nome, // Nome do contato
-    contato, // Telefone ou email
-    status // Status: "Bloqueado" ou "Desbloqueado"
+    constructor(nome, // Nome
+    contato, // Telefone ou WhatsApp
+    email, // ⬅email
+    status // "Bloqueado" | "Desbloqueado"
     ) {
         this.nome = nome;
         this.contato = contato;
+        this.email = email;
         this.status = status;
     }
 }
-// Array para armazenar todos os contatos 
-let contatos = [];
-// Índice para controlar se estamos editando algum contato 
-let indiceEditando = null; // null e se for novo
-const form = document.getElementById("form-contato"); // Pegando o formulário onde o usuário vai digitar os dados do contato
-const inputNome = document.getElementById("nomo"); // Pegando o campo de texto para o nome do contato
-const inputContato = document.getElementById("contato"); // Pegando o campo de texto para o telefone ou email do contato
-const selectStatus = document.getElementById("status"); // Pegando o campo seletor para o status do contato (Bloqueado ou Desbloqueado)
-const modal = document.getElementById("form-modal"); // Pegando o modal (janela que aparece para adicionar/editar contato)
-const btnNovo = document.getElementById("btn-novo"); // Pegando o botão "+ Novo" que abre o formulário para adicionar contato novo
-const btnCancelar = document.getElementById("btn-cancelar"); // Pegando o botão "Cancelar" dentro do formulário para fechar o modal sem salvar
-const tabela = document.getElementById("tabela-contatos"); // Pegando o corpo da tabela onde os contatos serão listados (elemento <tbody>)
-// Ao clicar no botão "Novo", abrir o modal para adicionar contato novo
-btnNovo.addEventListener("click", () => {
-    indiceEditando = null; // Não estamos editando ninguém
-    form.reset(); // Limpar formulário
-    modal.classList.remove("oculto"); // Mostrar modal
-});
-// Ao clicar em "Cancelar", fechar o modal e limpar o formulário
-btnCancelar.addEventListener("click", () => {
-    modal.classList.add("oculto"); // Esconder modal
-    form.reset(); // Limpar formulário
-    indiceEditando = null; // Cancelar edição
-});
-// Quando o formulário for enviado (adicionar ou editar)
-form.addEventListener("submit", (e) => {
-    e.preventDefault(); // Evita recarregar a página
-    // Pegar os valores digitados no formulário
-    const nome = inputNome.value.trim();
-    const contato = inputContato.value.trim();
-    const status = selectStatus.value;
-    // Validar campos obrigatórios
-    if (!nome || !contato) {
-        alert("Preencha todos os campos!");
-        return;
-    }
-    // Criar novo contato com os dados do formulário
-    const novoContato = new Contato(nome, contato, status);
-    // Se estiver adicionando (não editando)
-    if (indiceEditando === null) {
-        //verificar se já existe um contato com o mesmo número
-        const numeroJaExiste = contatos.some(c => c.contato === contato);
-        if (numeroJaExiste) {
-            alert('Este número já está cadastrado!');
-            return;
-        }
-        //Adiciona o novo contato na array
-        contatos.push(novoContato);
-    }
-    else {
-        //atualizar o proprio numero mesmo que seja igual
-        const numeroJaExiste = contatos.some((c, i) => c.contato === contato && i !== indiceEditando);
-        if (numeroJaExiste) {
-            alert('Este número já está cadastrado em outro contato!');
-            return;
-        }
-        contatos[indiceEditando] = novoContato; // Atualiza contato existente
-        indiceEditando = null; // Limpa índice edição
-    }
-    salvarNoLocalStorage(); // Salvar dados atualizados no navegador
-    form.reset(); // Limpar formulário
-    modal.classList.add("oculto"); // Fechar modal
-    atualizarTabela(); // Atualizar tabela na tela
-});
-// Função para atualizar a tabela de contatos na tela
-function atualizarTabela() {
-    tabela.innerHTML = ""; // Limpa tabela
-    // Para cada contato, criar uma linha com os dados e botões
-    contatos.forEach((contato, index) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-      <td>${contato.nome}</td>
-      <td>${contato.contato}</td>
-      <td>${contato.status === "Bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
-      <td>
-        <button class="editar" data-index="${index}">✏️</button>
-        <button class="apagar" data-index="${index}">🗑️</button>
-      </td>
-    `;
-        tabela.appendChild(tr); // Adiciona linha na tabela
-    });
-    // Ativa botões "Editar"
-    document.querySelectorAll(".editar").forEach((btn) => btn.addEventListener("click", () => {
-        const i = Number(btn.dataset.index);
-        editarContato(i);
-    }));
-    // Ativa botões "Apagar"
-    document.querySelectorAll(".apagar").forEach((btn) => btn.addEventListener("click", () => {
-        const i = Number(btn.dataset.index);
-        apagarContato(i);
-    }));
-}
-// Função para preencher o formulário e abrir modal para editar contato
-function editarContato(index) {
-    const c = contatos[index];
-    inputNome.value = c.nome;
-    inputContato.value = c.contato;
-    selectStatus.value = c.status;
-    indiceEditando = index; // Marca o contato que está sendo editado
-    modal.classList.remove("oculto"); // Abre modal
-}
-// Função para apagar contato da lista
-function apagarContato(index) {
-    if (confirm("Deseja apagar este contato?")) {
-        contatos.splice(index, 1); // Remove contato do array
-        salvarNoLocalStorage(); // Atualiza dados no navegador
-        atualizarTabela(); // Atualiza tabela na tela
-    }
-}
-// Função para salvar contatos no localStorage do navegador
-function salvarNoLocalStorage() {
-    localStorage.setItem("contatos", JSON.stringify(contatos));
-}
-// Função para carregar contatos do localStorage ao abrir página
-function carregarDoLocalStorage() {
+// --------------------- Estado ---------------------
+let contatos = []; // Lista de contatos
+let indiceEditando = null; // null = inserção
+// --------------------- Elementos ------------------
+const form = document.getElementById("form-contato");
+const inputNome = document.getElementById("nomo");
+const inputContato = document.getElementById("contato");
+const inputEmail = document.getElementById("email"); // NOVO
+const selectStatus = document.getElementById("status");
+const modal = document.getElementById("form-modal");
+const btnNovo = document.getElementById("btn-novo");
+const btnCancelar = document.getElementById("btn-cancelar");
+const tabela = document.getElementById("tabela-contatos");
+const busca = document.getElementById("barra-pesquisa");
+// ------------------- Utilidades -------------------
+const salvarNoLocalStorage = () => localStorage.setItem("contatos", JSON.stringify(contatos));
+const carregarDoLocalStorage = () => {
     const dados = localStorage.getItem("contatos");
     if (dados)
         contatos = JSON.parse(dados);
+};
+// --------------------- UI -------------------------
+btnNovo.onclick = () => { indiceEditando = null; form.reset(); modal.classList.remove("oculto"); };
+btnCancelar.onclick = () => { modal.classList.add("oculto"); form.reset(); indiceEditando = null; };
+// Envio do formulário (salvar ou editar)
+form.onsubmit = e => {
+    e.preventDefault();
+    const nome = inputNome.value.trim();
+    const contato = inputContato.value.trim();
+    const email = inputEmail.value.trim();
+    const status = selectStatus.value;
+    if (!nome || !contato || !email) {
+        alert("Preencha todos os campos!");
+        return;
+    }
+    const novoContato = new Contato(nome, contato, email, status);
+    // Inserção
+    if (indiceEditando === null) {
+        if (contatos.some(c => c.contato === contato)) {
+            alert("Este número já está cadastrado!");
+            return;
+        }
+        contatos.push(novoContato);
+        // Edição
+    }
+    else {
+        if (contatos.some((c, i) => c.contato === contato && i !== indiceEditando)) {
+            alert("Este número já está cadastrado em outro contato!");
+            return;
+        }
+        contatos[indiceEditando] = novoContato;
+        indiceEditando = null;
+    }
+    salvarNoLocalStorage();
+    form.reset();
+    modal.classList.add("oculto");
+    atualizarTabela();
+};
+// Renderização da tabela
+function atualizarTabela(lista = contatos) {
+    tabela.innerHTML = "";
+    lista.forEach((c => {
+        const realIndex = contatos.indexOf(c); // Índice real no array original
+        tabela.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${c.nome}</td>
+        <td>${c.contato}</td>
+        <td>${c.email}</td> <!-- e‑mail -->
+        <td>${c.status === "Bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>
+          <button class="editar" data-i="${realIndex}">✏️</button>
+          <button class="apagar" data-i="${realIndex}">🗑️</button>
+        </td>
+      </tr>`);
+    }));
+    // Botões editar/apagar
+    tabela.querySelectorAll("button.editar").forEach(btn => btn.onclick = () => editarContato(+btn.dataset.i));
+    tabela.querySelectorAll("button.apagar").forEach(btn => btn.onclick = () => apagarContato(+btn.dataset.i));
 }
-// Ao carregar a página, carrega os contatos e atualiza a tabela
+// Editar
+function editarContato(i) {
+    const c = contatos[i];
+    inputNome.value = c.nome;
+    inputContato.value = c.contato;
+    inputEmail.value = c.email; // pré‑preenche
+    selectStatus.value = c.status;
+    indiceEditando = i;
+    modal.classList.remove("oculto");
+}
+// Apagar
+function apagarContato(i) {
+    if (confirm("Deseja apagar este contato?")) {
+        contatos.splice(i, 1);
+        salvarNoLocalStorage();
+        atualizarTabela();
+    }
+}
+// Barra de pesquisa
+if (busca) {
+    busca.oninput = () => {
+        const termo = busca.value.toLowerCase();
+        atualizarTabela(contatos.filter(c => c.nome.toLowerCase().includes(termo)));
+    };
+}
+// ------------ Inicialização ---------------
 carregarDoLocalStorage();
 atualizarTabela();
