@@ -4,7 +4,8 @@ class Contato {
     public nome: string,
     public contato: string,
     public email: string,
-    public status: string // "bloqueado" | "desbloqueado"
+    public status: string, // "bloqueado" | "desbloqueado"
+    public categoria: string
   ) {}
 }
 
@@ -13,16 +14,17 @@ let contatos: Contato[] = [];
 let indiceEditando: number | null = null;
 
 // --------------------- Elementos ------------------
-const form          = document.getElementById("form-contato")  as HTMLFormElement;
-const inputNome     = document.getElementById("nomo")          as HTMLInputElement;
-const inputContato  = document.getElementById("contato")       as HTMLInputElement;
-const inputEmail    = document.getElementById("email")         as HTMLInputElement;
-const selectStatus  = document.getElementById("status")        as HTMLSelectElement;
-const modal         = document.getElementById("form-modal")    as HTMLElement;
-const btnNovo       = document.getElementById("btn-novo")      as HTMLButtonElement;
-const btnCancelar   = document.getElementById("btn-cancelar")  as HTMLButtonElement;
+const form          = document.getElementById("form-contato")    as HTMLFormElement;
+const inputNome     = document.getElementById("nomo")            as HTMLInputElement;
+const inputContato  = document.getElementById("contato")         as HTMLInputElement;
+const inputEmail    = document.getElementById("email")           as HTMLInputElement;
+const selectStatus  = document.getElementById("status")          as HTMLSelectElement;
+const modal         = document.getElementById("form-modal")      as HTMLElement;
+const btnNovo       = document.getElementById("btn-novo")        as HTMLButtonElement;
+const btnCancelar   = document.getElementById("btn-cancelar")    as HTMLButtonElement;
 const tabela        = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
-const busca         = document.getElementById("barra-pesquisa") as HTMLInputElement | null;
+const busca         = document.getElementById("barra-pesquisa")  as HTMLInputElement | null;
+const inputCategoria = document.getElementById("categoria") as HTMLInputElement;
 
 // ------------------- Utilidades -------------------
 const salvarNoLocalStorage = () =>
@@ -53,14 +55,15 @@ form.onsubmit = e => {
   const nome    = inputNome.value.trim();
   const contato = inputContato.value.trim();
   const email   = inputEmail.value.trim();
-  const status  = selectStatus.value.toLowerCase().trim(); // ✅ Correção aplicada aqui
+  const status  = selectStatus.value.trim(); 
+  const categoria = inputCategoria.value.trim();
 
-  if (!nome || !contato || !email) {
+  if (!nome || !contato || !email ) {
     alert("Preencha todos os campos!");
     return;
   }
 
-  const novoContato = new Contato(nome, contato, email, status);
+  const novoContato = new Contato(nome, contato, email, status, categoria);
 
   if (indiceEditando === null) {
     if (contatos.some(c => c.contato === contato)) {
@@ -94,6 +97,7 @@ function atualizarTabela(lista: Contato[] = contatos): void {
         <td>${c.contato}</td>
         <td>${c.email}</td>
         <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>${c.categoria}</td>
         <td>
           <button class="editar" data-i="${realIndex}">✏️</button>
           <button class="apagar" data-i="${realIndex}">🗑️</button>
@@ -112,10 +116,11 @@ function atualizarTabela(lista: Contato[] = contatos): void {
 // Editar
 function editarContato(i: number) {
   const c = contatos[i];
-  inputNome.value    = c.nome;
-  inputContato.value = c.contato;
-  inputEmail.value   = c.email;
-  selectStatus.value = c.status;
+  inputNome.value      = c.nome;
+  inputContato.value   = c.contato;
+  inputEmail.value     = c.email;
+  selectStatus.value   = c.status;
+  inputCategoria.value = c.categoria;
   indiceEditando = i;
   modal.classList.remove("oculto");
 }
@@ -143,7 +148,7 @@ if (busca) {
       (c.nome?.toLowerCase().includes(termo) ?? false) ||
       (c.contato?.includes(termo) ?? false) ||
       (c.email?.toLowerCase().includes(termo) ?? false) ||
-      (c.status?.toLowerCase().trim().includes(termo) ?? false)
+      (c.categoria?.toLowerCase().includes(termo) ?? false) 
     );
 
     atualizarTabela(resultados);
@@ -152,12 +157,4 @@ if (busca) {
 
 // ------------ Inicialização ---------------
 carregarDoLocalStorage();
-
-// ✅ Correção: normaliza os status já carregados do localStorage
-contatos.forEach(c => {
-  if (c.status) {
-    c.status = c.status.toLowerCase().trim();
-  }
-});
-
 atualizarTabela();
