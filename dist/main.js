@@ -1,8 +1,8 @@
 "use strict";
-// Classe que representa um contato
+Object.defineProperty(exports, "__esModule", { value: true });
+const csv_export_js_1 = require("./csv-export.js");
 class Contato {
-    constructor(nome, contato, email, status, // "bloqueado" | "desbloqueado"
-    categoria) {
+    constructor(nome, contato, email, status, categoria) {
         this.nome = nome;
         this.contato = contato;
         this.email = email;
@@ -10,29 +10,19 @@ class Contato {
         this.categoria = categoria;
     }
 }
-// --------------------- Estado ---------------------
 let contatos = [];
 let indiceEditando = null;
-// --------------------- Elementos ------------------
 const form = document.getElementById("form-contato");
 const inputNome = document.getElementById("nomo");
 const inputContato = document.getElementById("contato");
 const inputEmail = document.getElementById("email");
 const selectStatus = document.getElementById("status");
+const inputCategoria = document.getElementById("categoria");
 const modal = document.getElementById("form-modal");
 const btnNovo = document.getElementById("btn-novo");
 const btnCancelar = document.getElementById("btn-cancelar");
 const tabela = document.getElementById("tabela-contatos");
 const busca = document.getElementById("barra-pesquisa");
-const inputCategoria = document.getElementById("categoria");
-// ------------------- Utilidades -------------------
-const salvarNoLocalStorage = () => localStorage.setItem("contatos", JSON.stringify(contatos));
-const carregarDoLocalStorage = () => {
-    const dados = localStorage.getItem("contatos");
-    if (dados)
-        contatos = JSON.parse(dados);
-};
-// --------------------- UI -------------------------
 btnNovo.onclick = () => {
     indiceEditando = null;
     form.reset();
@@ -41,64 +31,46 @@ btnNovo.onclick = () => {
 btnCancelar.onclick = () => {
     modal.classList.add("oculto");
     form.reset();
-    indiceEditando = null;
 };
-// Envio do formulário (salvar ou editar)
-form.onsubmit = e => {
+form.onsubmit = (e) => {
     e.preventDefault();
     const nome = inputNome.value.trim();
     const contato = inputContato.value.trim();
     const email = inputEmail.value.trim();
-    const status = selectStatus.value.trim();
+    const status = selectStatus.value;
     const categoria = inputCategoria.value.trim();
-    if (!nome || !contato || !email) {
-        alert("Preencha todos os campos!");
-        return;
-    }
     const novoContato = new Contato(nome, contato, email, status, categoria);
     if (indiceEditando === null) {
-        if (contatos.some(c => c.contato === contato)) {
-            alert("Este número já está cadastrado!");
-            return;
-        }
         contatos.push(novoContato);
     }
     else {
-        if (contatos.some((c, i) => c.contato === contato && i !== indiceEditando)) {
-            alert("Este número já está cadastrado em outro contato!");
-            return;
-        }
         contatos[indiceEditando] = novoContato;
         indiceEditando = null;
     }
-    salvarNoLocalStorage();
+    salvar();
     form.reset();
     modal.classList.add("oculto");
     atualizarTabela();
 };
-// Renderização da tabela
 function atualizarTabela(lista = contatos) {
     tabela.innerHTML = "";
-    lista.forEach((c => {
-        const realIndex = contatos.indexOf(c);
-        tabela.insertAdjacentHTML("beforeend", `
+    lista.forEach((c, i) => {
+        tabela.innerHTML += `
       <tr>
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>${c.status}</td>
         <td>${c.categoria}</td>
         <td>
-          <button class="editar" data-i="${realIndex}">✏️</button>
-          <button class="apagar" data-i="${realIndex}">🗑️</button>
+          <button onclick="editar(${i})">✏️</button>
+          <button onclick="apagar(${i})">🗑️</button>
         </td>
-      </tr>`);
-    }));
-    tabela.querySelectorAll("button.editar").forEach(btn => btn.onclick = () => editarContato(+btn.dataset.i));
-    tabela.querySelectorAll("button.apagar").forEach(btn => btn.onclick = () => apagarContato(+btn.dataset.i));
+      </tr>
+    `;
+    });
 }
-// Editar
-function editarContato(i) {
+window.editar = (i) => {
     const c = contatos[i];
     inputNome.value = c.nome;
     inputContato.value = c.contato;
@@ -107,33 +79,31 @@ function editarContato(i) {
     inputCategoria.value = c.categoria;
     indiceEditando = i;
     modal.classList.remove("oculto");
-}
-// Apagar
-function apagarContato(i) {
-    if (confirm("Deseja apagar este contato?")) {
+};
+window.apagar = (i) => {
+    if (confirm("Apagar contato?")) {
         contatos.splice(i, 1);
-        salvarNoLocalStorage();
+        salvar();
         atualizarTabela();
     }
+};
+function salvar() {
+    localStorage.setItem("contatos", JSON.stringify(contatos));
 }
-// Barra de pesquisa
-if (busca) {
-    busca.oninput = () => {
-        const termo = busca.value.toLowerCase().trim();
-        if (!termo) {
-            atualizarTabela();
-            return;
-        }
-        const resultados = contatos.filter(c => {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            return ((_b = (_a = c.nome) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(termo)) !== null && _b !== void 0 ? _b : false) ||
-                ((_d = (_c = c.contato) === null || _c === void 0 ? void 0 : _c.includes(termo)) !== null && _d !== void 0 ? _d : false) ||
-                ((_f = (_e = c.email) === null || _e === void 0 ? void 0 : _e.toLowerCase().includes(termo)) !== null && _f !== void 0 ? _f : false) ||
-                ((_h = (_g = c.categoria) === null || _g === void 0 ? void 0 : _g.toLowerCase().includes(termo)) !== null && _h !== void 0 ? _h : false);
-        });
-        atualizarTabela(resultados);
-    };
+function carregar() {
+    const dados = localStorage.getItem("contatos");
+    if (dados)
+        contatos = JSON.parse(dados);
 }
-// ------------ Inicialização ---------------
-carregarDoLocalStorage();
+busca.oninput = () => {
+    const termo = busca.value.toLowerCase().trim();
+    const filtrados = contatos.filter(c => c.nome.toLowerCase().includes(termo) ||
+        c.contato.includes(termo) ||
+        c.email.toLowerCase().includes(termo) ||
+        c.categoria.toLowerCase().includes(termo));
+    atualizarTabela(filtrados);
+};
+const btnExportar = document.getElementById("btn-exportar");
+(0, csv_export_js_1.setupCSVExport)(() => contatos, btnExportar);
+carregar();
 atualizarTabela();

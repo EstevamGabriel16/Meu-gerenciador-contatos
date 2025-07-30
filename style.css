@@ -10,13 +10,27 @@
 body {
     background-color: #ffffff;
     color: #333;
-    padding: 2rem;
+    padding: 0;
+}
+
+.topo {
+    display: flex;
+    align-items: center; /* alinha verticalmente no centro */
+    gap: 20px; /* espaço entre logo e título */
+    padding: 10px 20px; /* espaçamento interno (opcional) */
+}
+
+/* Ajusta tamanho da logo */
+.img {
+    width: 80px;
+    margin: 0; /* remove margens para ficar alinhado */
 }
 
 /* Título */
 h1 {
-    margin-bottom: 1rem;
+      margin: 0; /* remove margens para alinhar melhor */
     color: #2ecc71;
+    font-size: 2rem;
 }
 
 /* Botão "+ Novo" */
@@ -221,3 +235,5 @@ td button {
     border-radius: 5px;
     border: 1px solid #ccc;
 }
+
+

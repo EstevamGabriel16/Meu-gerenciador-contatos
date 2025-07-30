@@ -1,3 +1,5 @@
+
+
 // Classe que representa um contato
 class Contato {
   constructor(
@@ -14,17 +16,17 @@ let contatos: Contato[] = [];
 let indiceEditando: number | null = null;
 
 // --------------------- Elementos ------------------
-const form          = document.getElementById("form-contato")    as HTMLFormElement;
-const inputNome     = document.getElementById("nomo")            as HTMLInputElement;
-const inputContato  = document.getElementById("contato")         as HTMLInputElement;
-const inputEmail    = document.getElementById("email")           as HTMLInputElement;
-const selectStatus  = document.getElementById("status")          as HTMLSelectElement;
-const modal         = document.getElementById("form-modal")      as HTMLElement;
-const btnNovo       = document.getElementById("btn-novo")        as HTMLButtonElement;
-const btnCancelar   = document.getElementById("btn-cancelar")    as HTMLButtonElement;
-const tabela        = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
-const busca         = document.getElementById("barra-pesquisa")  as HTMLInputElement | null;
-const inputCategoria = document.getElementById("categoria") as HTMLInputElement;
+const form           = document.getElementById("form-contato")    as HTMLFormElement;
+const inputNome      = document.getElementById("nomo")            as HTMLInputElement;
+const inputContato   = document.getElementById("contato")         as HTMLInputElement;
+const inputEmail     = document.getElementById("email")           as HTMLInputElement;
+const selectStatus   = document.getElementById("status")          as HTMLSelectElement;
+const modal          = document.getElementById("form-modal")      as HTMLElement;
+const btnNovo        = document.getElementById("btn-novo")        as HTMLButtonElement;
+const btnCancelar    = document.getElementById("btn-cancelar")    as HTMLButtonElement;
+const tabela         = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
+const busca          = document.getElementById("barra-pesquisa")  as HTMLInputElement | null;
+const inputCategoria = document.getElementById("categoria")       as HTMLInputElement;
 
 // ------------------- Utilidades -------------------
 const salvarNoLocalStorage = () =>
@@ -47,15 +49,18 @@ btnCancelar.onclick = () => {
   form.reset();
   indiceEditando = null;
 };
+function ordenarContatos(): void {
+  contatos.sort((a, b) => a.nome.localeCompare(b.nome));
+}
 
 // Envio do formulário (salvar ou editar)
 form.onsubmit = e => {
   e.preventDefault();
 
-  const nome    = inputNome.value.trim();
-  const contato = inputContato.value.trim();
-  const email   = inputEmail.value.trim();
-  const status  = selectStatus.value.trim(); 
+  const nome      = inputNome.value.trim();
+  const contato   = inputContato.value.trim();
+  const email     = inputEmail.value.trim();
+  const status    = selectStatus.value.trim(); 
   const categoria = inputCategoria.value.trim();
 
   if (!nome || !contato || !email ) {
@@ -79,7 +84,7 @@ form.onsubmit = e => {
     contatos[indiceEditando] = novoContato;
     indiceEditando = null;
   }
-
+  ordenarContatos(); // Organiza em ordem alfabética
   salvarNoLocalStorage();
   form.reset();
   modal.classList.add("oculto");
@@ -121,7 +126,7 @@ function editarContato(i: number) {
   inputEmail.value     = c.email;
   selectStatus.value   = c.status;
   inputCategoria.value = c.categoria;
-  indiceEditando = i;
+  indiceEditando       = i;
   modal.classList.remove("oculto");
 }
 
@@ -154,7 +159,6 @@ if (busca) {
     atualizarTabela(resultados);
   };
 }
-
-// ------------ Inicialização ---------------
+-
 carregarDoLocalStorage();
 atualizarTabela();
