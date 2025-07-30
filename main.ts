@@ -4,7 +4,7 @@ class Contato {
     public nome: string,
     public contato: string,
     public email: string,
-    public status: string,
+    public status: string, // "bloqueado" | "desbloqueado"
     public categoria: string
   ) {}
 }
@@ -13,19 +13,19 @@ class Contato {
 let contatos: Contato[] = [];
 let indiceEditando: number | null = null;
 
-// Elementos (mantendo os IDs originais do HTML)
-const form = document.getElementById("form-contato") as HTMLFormElement;
-const inputNome = document.getElementById("nome") as HTMLInputElement; // Corrigido de 'nomo' para 'nome'
-const inputContato = document.getElementById("contato") as HTMLInputElement;
-const inputEmail = document.getElementById("email") as HTMLInputElement;
-const selectStatus = document.getElementById("status") as HTMLSelectElement;
-const modal = document.getElementById("form-modal") as HTMLElement;
+// --------------------- Elementos ------------------
+const form          = document.getElementById("form-contato") as HTMLFormElement;
+const inputNome     = document.getElementById("nome") as HTMLInputElement;
+const inputContato  = document.getElementById("contato") as HTMLInputElement;
+const inputEmail    = document.getElementById("email") as HTMLInputElement;
+const selectStatus  = document.getElementById("status") as HTMLSelectElement;
+const modal         = document.getElementById("form-modal") as HTMLElement;
 const btnNovo = document.getElementById("btn-novo") as HTMLButtonElement;
 const btnCancelar = document.getElementById("btn-cancelar") as HTMLButtonElement;
 const tabela = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
 const busca = document.getElementById("barra-pesquisa") as HTMLInputElement | null;
+const inputCategoria = document.getElementById("categoria") as HTMLInputElement;
 const btnExportar = document.getElementById("btn-exportar") as HTMLButtonElement;
-const inputCategoria = document.getElementById("categoria")       as HTMLInputElement;
 
 // Utilidades
 const salvarNoLocalStorage = () => {
@@ -42,6 +42,10 @@ const validarEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
+
+function ordenarContatos(): void {
+  contatos.sort((a, b) => a.nome.localeCompare(b.nome));
+}
 
 // UI
 btnNovo.onclick = () => {
@@ -62,7 +66,7 @@ form.onsubmit = e => {
   const nome = inputNome.value.trim();
   const contato = inputContato.value.trim();
   const email = inputEmail.value.trim();
-  const status = selectStatus.value;
+  const status = selectStatus.value.trim(); 
   const categoria = inputCategoria.value.trim();
 
   if (!nome || !contato || !email) {
@@ -75,7 +79,7 @@ form.onsubmit = e => {
     return;
   }
 
-  const novoContato = new Contato(nome, contato, email, status,categoria);
+  const novoContato = new Contato(nome, contato, email, status, categoria);
 
   if (indiceEditando === null) {
     if (contatos.some(c => c.contato === contato)) {
@@ -91,7 +95,8 @@ form.onsubmit = e => {
     contatos[indiceEditando] = novoContato;
     indiceEditando = null;
   }
-
+  
+  ordenarContatos();
   salvarNoLocalStorage();
   modal.classList.add("oculto");
   atualizarTabela();
@@ -105,7 +110,7 @@ function atualizarTabela(lista: Contato[] = contatos): void {
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status}</td>
+        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
         <td>${c.categoria}</td>
         <td>
           <button class="editar" data-i="${index}">✏️</button>
@@ -129,41 +134,19 @@ function atualizarTabela(lista: Contato[] = contatos): void {
   });
 }
 
-function editarContato(i: number): boolean {
-  // Verificação mais robusta do índice
-  if (i < 0 || i >= contatos.length) {
-    console.error(`Índice inválido para edição: ${i}`);
-    return false;
-  }
+function editarContato(i: number) {
+  if (i < 0 || i >= contatos.length) return;
 
-  // Verifica se os elementos do formulário existem
-  if (!inputNome || !inputContato || !inputEmail || !selectStatus || !inputCategoria) {
-    console.error('Elementos do formulário não encontrados!');
-    return false;
-  }
-
-  try {
-    const c = contatos[i];
-    
-    // Preenche os campos do formulário
-    inputNome.value = c.nome;
-    inputContato.value = c.contato;
-    inputEmail.value = c.email;
-    selectStatus.value = c.status;
-    inputCategoria.value = c.categoria;
-    
-    // Atualiza o índice sendo editado
-    indiceEditando = i;
-    
-    // Mostra o modal
-    modal.classList.remove("oculto");
-    
-    return true;
-  } catch (error) {
-    console.error('Erro ao editar contato:', error);
-    return false;
-  }
+  const c = contatos[i];
+  inputNome.value = c.nome;
+  inputContato.value = c.contato;
+  inputEmail.value = c.email;
+  selectStatus.value = c.status;
+  inputCategoria.value = c.categoria;
+  indiceEditando = i;
+  modal.classList.remove("oculto");
 }
+
 function apagarContato(i: number) {
   if (i < 0 || i >= contatos.length) return;
   
@@ -174,7 +157,6 @@ function apagarContato(i: number) {
   }
 }
 
-// Barra de pesquisa
 // Barra de pesquisa
 if (busca) {
   busca.addEventListener('input', () => {
@@ -192,7 +174,6 @@ if (busca) {
   });
 }
 
-
 // Exportar para CSV
 btnExportar.addEventListener('click', () => {
   if (contatos.length === 0) {
@@ -201,8 +182,8 @@ btnExportar.addEventListener('click', () => {
   }
 
   const csv = [
-    ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria',],
-    ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria,])
+    ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria'],
+    ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria])
       .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
   ].join('\n');
 

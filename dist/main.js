@@ -1,7 +1,8 @@
 "use strict";
 // Classe que representa um contato
 class Contato {
-    constructor(nome, contato, email, status, categoria) {
+    constructor(nome, contato, email, status, // "bloqueado" | "desbloqueado"
+    categoria) {
         this.nome = nome;
         this.contato = contato;
         this.email = email;
@@ -12,9 +13,9 @@ class Contato {
 // Estado
 let contatos = [];
 let indiceEditando = null;
-// Elementos (mantendo os IDs originais do HTML)
+// --------------------- Elementos ------------------
 const form = document.getElementById("form-contato");
-const inputNome = document.getElementById("nome"); // Corrigido de 'nomo' para 'nome'
+const inputNome = document.getElementById("nome");
 const inputContato = document.getElementById("contato");
 const inputEmail = document.getElementById("email");
 const selectStatus = document.getElementById("status");
@@ -23,8 +24,8 @@ const btnNovo = document.getElementById("btn-novo");
 const btnCancelar = document.getElementById("btn-cancelar");
 const tabela = document.getElementById("tabela-contatos");
 const busca = document.getElementById("barra-pesquisa");
-const btnExportar = document.getElementById("btn-exportar");
 const inputCategoria = document.getElementById("categoria");
+const btnExportar = document.getElementById("btn-exportar");
 // Utilidades
 const salvarNoLocalStorage = () => {
     localStorage.setItem("contatos", JSON.stringify(contatos));
@@ -39,6 +40,9 @@ const validarEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 };
+function ordenarContatos() {
+    contatos.sort((a, b) => a.nome.localeCompare(b.nome));
+}
 // UI
 btnNovo.onclick = () => {
     indiceEditando = null;
@@ -55,7 +59,7 @@ form.onsubmit = e => {
     const nome = inputNome.value.trim();
     const contato = inputContato.value.trim();
     const email = inputEmail.value.trim();
-    const status = selectStatus.value;
+    const status = selectStatus.value.trim();
     const categoria = inputCategoria.value.trim();
     if (!nome || !contato || !email) {
         alert("Preencha todos os campos!");
@@ -81,6 +85,7 @@ form.onsubmit = e => {
         contatos[indiceEditando] = novoContato;
         indiceEditando = null;
     }
+    ordenarContatos();
     salvarNoLocalStorage();
     modal.classList.add("oculto");
     atualizarTabela();
@@ -93,7 +98,7 @@ function atualizarTabela(lista = contatos) {
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status}</td>
+        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
         <td>${c.categoria}</td>
         <td>
           <button class="editar" data-i="${index}">✏️</button>
@@ -115,34 +120,16 @@ function atualizarTabela(lista = contatos) {
     });
 }
 function editarContato(i) {
-    // Verificação mais robusta do índice
-    if (i < 0 || i >= contatos.length) {
-        console.error(`Índice inválido para edição: ${i}`);
-        return false;
-    }
-    // Verifica se os elementos do formulário existem
-    if (!inputNome || !inputContato || !inputEmail || !selectStatus || !inputCategoria) {
-        console.error('Elementos do formulário não encontrados!');
-        return false;
-    }
-    try {
-        const c = contatos[i];
-        // Preenche os campos do formulário
-        inputNome.value = c.nome;
-        inputContato.value = c.contato;
-        inputEmail.value = c.email;
-        selectStatus.value = c.status;
-        inputCategoria.value = c.categoria;
-        // Atualiza o índice sendo editado
-        indiceEditando = i;
-        // Mostra o modal
-        modal.classList.remove("oculto");
-        return true;
-    }
-    catch (error) {
-        console.error('Erro ao editar contato:', error);
-        return false;
-    }
+    if (i < 0 || i >= contatos.length)
+        return;
+    const c = contatos[i];
+    inputNome.value = c.nome;
+    inputContato.value = c.contato;
+    inputEmail.value = c.email;
+    selectStatus.value = c.status;
+    inputCategoria.value = c.categoria;
+    indiceEditando = i;
+    modal.classList.remove("oculto");
 }
 function apagarContato(i) {
     if (i < 0 || i >= contatos.length)
@@ -153,7 +140,6 @@ function apagarContato(i) {
         atualizarTabela();
     }
 }
-// Barra de pesquisa
 // Barra de pesquisa
 if (busca) {
     busca.addEventListener('input', () => {
@@ -175,8 +161,8 @@ btnExportar.addEventListener('click', () => {
         return;
     }
     const csv = [
-        ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria',],
-        ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria,])
+        ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria'],
+        ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria])
             .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

@@ -1,84 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Agenda de Contatos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Agenda de Contatos</title>
 </head>
 
 <body>
-    <main>
-        <h1>Agenda de Contatos</h1>
-
-        <section class="pesquisa">
-            <input type="text" id="barra-pesquisa" placeholder="Pesquisar por nome..." aria-label="Campo de pesquisa">
-        </section>
-
-        <section class="controle">
-            <button id="btn-novo">+ Novo</button>
-            <button id="btn-exportar">Exportar CSV</button>
-        </section>
-
-        <table aria-label="Lista de contatos">
-            <thead>
-                <tr>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Contato</th>
-                    <th scope="col">E-mail</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Categoria</th>
-                    <th scope="col">Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-contatos">
-                <!-- Contatos vão aparecer aqui -->
-            </tbody>
-        </table>
-    </main>
-
-    <!-- Modal do formulário -->
-    <div id="form-modal" class="modal oculto" aria-hidden="true">
-        <form id="form-contato" aria-labelledby="modal-title">
-            <h2 id="modal-title">Novo Contato</h2>
-
-            <div class="form-group">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" required aria-required="true" />
-            </div>
-
-            <div class="form-group">
-                <label for="contato">Contato:</label>
-                <input type="text" id="contato" required aria-required="true" />
-            </div>
-
-            <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" required aria-required="true" />
-            </div>
-
-            <div class="form-group">
-                <label for="Categoria">Categoria:</label>
-                <input type="categoria" id="categoria" required aria-required="true" />
-            </div>
-
-            <div class="form-group">
-                <label for="status">Status:</label>
-                <select id="status" required aria-required="true">
-                    <option value="Desbloqueado">✅ Desbloqueado</option>
-                    <option value="Bloqueado">🔒 Bloqueado</option>
-                </select>
-            </div>
-
-            <div class="button-save">
-                <button type="submit">Salvar</button>
-                <button type="button" id="btn-cancelar">Cancelar</button>
-            </div>
-        </form>
+  <main>
+    <div class="topo">
+      <img src="/img/logo.png" class="img" alt="Logo da agenda" />
+      <h1>Agenda de Contatos</h1>
     </div>
 
-    <script src="/dist/main.js"></script>
-</body>
+    <section class="pesquisa">
+      <input type="text" id="barra-pesquisa" placeholder="Pesquisar por nome..." aria-label="Campo de pesquisa">
+    </section>
 
+    <section class="controle">
+      <button id="btn-novo">+ Novo</button>
+      <button id="btn-exportar" class="btn-exportar">Exportar para CSV</button>
+    </section>
+
+    <table aria-label="Lista de contatos">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Contato</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th>Categoria</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabela-contatos">
+        <!-- Contatos vão aparecer aqui -->
+      </tbody>
+    </table>
+  </main>
+
+  <!-- Modal do formulário -->
+  <div id="form-modal" class="modal oculto" aria-hidden="true">
+    <form id="form-contato" aria-labelledby="modal-title">
+      <h2 id="modal-title">Novo Contato</h2>
+
+      <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" required="true" />
+      </div>
+
+      <div class="form-group">
+        <label for="contato">Contato:</label>
+        <input type="text" id="contato" required="true" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" required="true" />
+      </div>
+
+      <div class="form-group">
+        <label for="categoria">Categoria:</label>
+        <input type="text" id="categoria" required="true" />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status:</label>
+        <select id="status" required="true">
+          <option value="Desbloqueado">✅ Desbloqueado</option>
+          <option value="Bloqueado">🔒 Bloqueado</option>
+        </select>
+      </div>
+
+      <div class="button-save">
+        <button type="submit">Salvar</button>
+        <button type="button" id="btn-cancelar">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="/dist/main.js"></script>
+</body>
 </html>
