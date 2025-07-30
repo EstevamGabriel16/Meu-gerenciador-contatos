@@ -36,6 +36,7 @@ h1 {
 /* Botão "+ Novo" */
 .controle {
     margin-bottom: 1rem;
+    padding-left: 20px; 
 }
 
 #btn-novo {
@@ -225,7 +226,7 @@ td button {
 
 .pesquisa {
     margin: 20px 0;
-
+    padding-left: 20px;
 }
 
 #barra-pesquisa {
@@ -259,7 +260,7 @@ td button {
     display: flex;
 }
 
-/* Adicione estas regras ao seu style.css existente */
+
 
 /* Melhorias de acessibilidade para foco */
 button:focus, input:focus, select:focus {
