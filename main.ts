@@ -4,36 +4,46 @@ class Contato {
     public nome: string,
     public contato: string,
     public email: string,
-    public status: string // "bloqueado" | "desbloqueado"
+    public status: string,
+    public categoria: string
   ) {}
 }
 
-// --------------------- Estado ---------------------
+// Estado
 let contatos: Contato[] = [];
 let indiceEditando: number | null = null;
 
-// --------------------- Elementos ------------------
-const form          = document.getElementById("form-contato")  as HTMLFormElement;
-const inputNome     = document.getElementById("nomo")          as HTMLInputElement;
-const inputContato  = document.getElementById("contato")       as HTMLInputElement;
-const inputEmail    = document.getElementById("email")         as HTMLInputElement;
-const selectStatus  = document.getElementById("status")        as HTMLSelectElement;
-const modal         = document.getElementById("form-modal")    as HTMLElement;
-const btnNovo       = document.getElementById("btn-novo")      as HTMLButtonElement;
-const btnCancelar   = document.getElementById("btn-cancelar")  as HTMLButtonElement;
-const tabela        = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
-const busca         = document.getElementById("barra-pesquisa") as HTMLInputElement | null;
+// Elementos (mantendo os IDs originais do HTML)
+const form = document.getElementById("form-contato") as HTMLFormElement;
+const inputNome = document.getElementById("nome") as HTMLInputElement; // Corrigido de 'nomo' para 'nome'
+const inputContato = document.getElementById("contato") as HTMLInputElement;
+const inputEmail = document.getElementById("email") as HTMLInputElement;
+const selectStatus = document.getElementById("status") as HTMLSelectElement;
+const modal = document.getElementById("form-modal") as HTMLElement;
+const btnNovo = document.getElementById("btn-novo") as HTMLButtonElement;
+const btnCancelar = document.getElementById("btn-cancelar") as HTMLButtonElement;
+const tabela = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
+const busca = document.getElementById("barra-pesquisa") as HTMLInputElement | null;
+const btnExportar = document.getElementById("btn-exportar") as HTMLButtonElement;
+const inputCategoria = document.getElementById("categoria")       as HTMLInputElement;
 
-// ------------------- Utilidades -------------------
-const salvarNoLocalStorage = () =>
+// Utilidades
+const salvarNoLocalStorage = () => {
   localStorage.setItem("contatos", JSON.stringify(contatos));
+};
 
 const carregarDoLocalStorage = () => {
   const dados = localStorage.getItem("contatos");
   if (dados) contatos = JSON.parse(dados);
 };
 
-// --------------------- UI -------------------------
+// Validação de e-mail
+const validarEmail = (email: string): boolean => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+};
+
+// UI
 btnNovo.onclick = () => {
   indiceEditando = null;
   form.reset();
@@ -46,21 +56,26 @@ btnCancelar.onclick = () => {
   indiceEditando = null;
 };
 
-// Envio do formulário (salvar ou editar)
 form.onsubmit = e => {
   e.preventDefault();
 
-  const nome    = inputNome.value.trim();
+  const nome = inputNome.value.trim();
   const contato = inputContato.value.trim();
-  const email   = inputEmail.value.trim();
-  const status  = selectStatus.value.toLowerCase().trim(); // ✅ Correção aplicada aqui
+  const email = inputEmail.value.trim();
+  const status = selectStatus.value;
+  const categoria = inputCategoria.value.trim();
 
   if (!nome || !contato || !email) {
     alert("Preencha todos os campos!");
     return;
   }
 
-  const novoContato = new Contato(nome, contato, email, status);
+  if (!validarEmail(email)) {
+    alert("Por favor, insira um e-mail válido!");
+    return;
+  }
+
+  const novoContato = new Contato(nome, contato, email, status,categoria);
 
   if (indiceEditando === null) {
     if (contatos.some(c => c.contato === contato)) {
@@ -78,51 +93,81 @@ form.onsubmit = e => {
   }
 
   salvarNoLocalStorage();
-  form.reset();
   modal.classList.add("oculto");
   atualizarTabela();
 };
 
-// Renderização da tabela
 function atualizarTabela(lista: Contato[] = contatos): void {
   tabela.innerHTML = "";
-  lista.forEach((c => {
-    const realIndex = contatos.indexOf(c);
+  lista.forEach((c, index) => {
     tabela.insertAdjacentHTML("beforeend", `
       <tr>
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>${c.status}</td>
+        <td>${c.categoria}</td>
         <td>
-          <button class="editar" data-i="${realIndex}">✏️</button>
-          <button class="apagar" data-i="${realIndex}">🗑️</button>
+          <button class="editar" data-i="${index}">✏️</button>
+          <button class="apagar" data-i="${index}">🗑️</button>
         </td>
       </tr>`);
-  }));
+  });
 
-  tabela.querySelectorAll<HTMLButtonElement>("button.editar").forEach(btn =>
-    btn.onclick = () => editarContato(+btn.dataset.i!)
-  );
-  tabela.querySelectorAll<HTMLButtonElement>("button.apagar").forEach(btn =>
-    btn.onclick = () => apagarContato(+btn.dataset.i!)
-  );
+  tabela.querySelectorAll("button.editar").forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = parseInt(btn.getAttribute('data-i') || '0');
+      editarContato(index);
+    });
+  });
+
+  tabela.querySelectorAll("button.apagar").forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = parseInt(btn.getAttribute('data-i') || '0');
+      apagarContato(index);
+    });
+  });
 }
 
-// Editar
-function editarContato(i: number) {
-  const c = contatos[i];
-  inputNome.value    = c.nome;
-  inputContato.value = c.contato;
-  inputEmail.value   = c.email;
-  selectStatus.value = c.status;
-  indiceEditando = i;
-  modal.classList.remove("oculto");
-}
+function editarContato(i: number): boolean {
+  // Verificação mais robusta do índice
+  if (i < 0 || i >= contatos.length) {
+    console.error(`Índice inválido para edição: ${i}`);
+    return false;
+  }
 
-// Apagar
+  // Verifica se os elementos do formulário existem
+  if (!inputNome || !inputContato || !inputEmail || !selectStatus || !inputCategoria) {
+    console.error('Elementos do formulário não encontrados!');
+    return false;
+  }
+
+  try {
+    const c = contatos[i];
+    
+    // Preenche os campos do formulário
+    inputNome.value = c.nome;
+    inputContato.value = c.contato;
+    inputEmail.value = c.email;
+    selectStatus.value = c.status;
+    inputCategoria.value = c.categoria;
+    
+    // Atualiza o índice sendo editado
+    indiceEditando = i;
+    
+    // Mostra o modal
+    modal.classList.remove("oculto");
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao editar contato:', error);
+    return false;
+  }
+}
 function apagarContato(i: number) {
-  if (confirm("Deseja apagar este contato?")) {
+  if (i < 0 || i >= contatos.length) return;
+  
+  if (confirm(`Deseja apagar o contato "${contatos[i].nome}"?`)) {
     contatos.splice(i, 1);
     salvarNoLocalStorage();
     atualizarTabela();
@@ -130,34 +175,47 @@ function apagarContato(i: number) {
 }
 
 // Barra de pesquisa
+// Barra de pesquisa
 if (busca) {
-  busca.oninput = () => {
+  busca.addEventListener('input', () => {
     const termo = busca.value.toLowerCase().trim();
-
-    if (!termo) {
-      atualizarTabela();
-      return;
-    }
-
-    const resultados = contatos.filter(c =>
-      (c.nome?.toLowerCase().includes(termo) ?? false) ||
-      (c.contato?.includes(termo) ?? false) ||
-      (c.email?.toLowerCase().includes(termo) ?? false) ||
-      (c.status?.toLowerCase().trim().includes(termo) ?? false)
-    );
-
+    const resultados = termo 
+      ? contatos.filter(c => 
+          c.nome.toLowerCase().includes(termo) ||
+          c.contato.includes(termo) ||
+          c.email.toLowerCase().includes(termo) ||
+          c.status.toLowerCase().includes(termo) ||
+          (c.categoria && c.categoria.toLowerCase().includes(termo))
+        )
+      : contatos;
     atualizarTabela(resultados);
-  };
+  });
 }
 
-// ------------ Inicialização ---------------
-carregarDoLocalStorage();
 
-// ✅ Correção: normaliza os status já carregados do localStorage
-contatos.forEach(c => {
-  if (c.status) {
-    c.status = c.status.toLowerCase().trim();
+// Exportar para CSV
+btnExportar.addEventListener('click', () => {
+  if (contatos.length === 0) {
+    alert("Não há contatos para exportar!");
+    return;
   }
+
+  const csv = [
+    ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria',],
+    ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria,])
+      .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'contatos.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 });
 
+// Inicialização
+carregarDoLocalStorage();
 atualizarTabela();
