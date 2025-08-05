@@ -79,8 +79,15 @@ form.onsubmit = e => {
     return;
   }
 
+
+  // --------------------- Criar contato ------------------
   const novoContato = new Contato(nome, contato, email, status, categoria);
 
+  
+if (!/^\d+$/.test(contato)) {
+  alert("Por favor, insira apenas números no campo de contato!");
+  return;
+}
   if (indiceEditando === null) {
     if (contatos.some(c => c.contato === contato)) {
       alert("Este número já está cadastrado!");
@@ -101,6 +108,7 @@ form.onsubmit = e => {
   modal.classList.add("oculto");
   atualizarTabela();
 };
+//-------------------------------------------------------
 
 function atualizarTabela(lista: Contato[] = contatos): void {
   tabela.innerHTML = "";
