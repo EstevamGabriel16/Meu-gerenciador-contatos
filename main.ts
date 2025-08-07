@@ -70,12 +70,12 @@ form.onsubmit = e => {
   const categoria = inputCategoria.value.trim();
 
   if (!nome || !contato || !email) {
-    alert("Preencha todos os campos!");
+    showAlert("Preencha todos os campos!");
     return;
   }
 
   if (!validarEmail(email)) {
-    alert("Por favor, insira um e-mail válido!");
+    showAlert("Por favor, insira um e-mail válido!");
     return;
   }
 
@@ -85,18 +85,18 @@ form.onsubmit = e => {
 
   
 if (!/^\d+$/.test(contato)) {
-  alert("Por favor, insira apenas números no campo de contato!");
+  showAlert("Por favor, insira apenas números no campo de contato!");
   return;
 }
   if (indiceEditando === null) {
     if (contatos.some(c => c.contato === contato)) {
-      alert("Este número já está cadastrado!");
+      showAlert("Este número já está cadastrado!");
       return;
     }
     contatos.push(novoContato);
   } else {
     if (contatos.some((c, i) => c.contato === contato && i !== indiceEditando)) {
-      alert("Este número já está cadastrado em outro contato!");
+      showAlert("Este número já está cadastrado em outro contato!");
       return;
     }
     contatos[indiceEditando] = novoContato;
@@ -185,7 +185,7 @@ if (busca) {
 // Exportar para CSV
 btnExportar.addEventListener('click', () => {
   if (contatos.length === 0) {
-    alert("Não há contatos para exportar!");
+    showAlert("Não há contatos para exportar!");
     return;
   }
 
@@ -204,7 +204,22 @@ btnExportar.addEventListener('click', () => {
   link.click();
   document.body.removeChild(link);
 });
+//---------------Alert melhorado-------------------------
 
+
+// === FUNÇÃO SHOW ALERT === //
+function showAlert(mensagem: string): void {
+  const alertDiv = document.getElementById('customAlert')!;
+  const message = document.getElementById('alertMessage')!;
+  const closeBtn = document.getElementById('alertClose')!;
+
+  message.textContent = mensagem;
+  alertDiv.style.display = 'block';
+
+  closeBtn.onclick = () => {
+    alertDiv.style.display = 'none';
+  };
+}
 // Inicialização
 carregarDoLocalStorage();
 atualizarTabela();
