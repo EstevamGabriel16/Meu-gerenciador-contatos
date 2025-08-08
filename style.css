@@ -301,11 +301,11 @@ th[scope="col"] {
 .alert-container {
   display: none;
   position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: white;
+  top: 2%;
+  right: 2%;
+  transform: none;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -323,8 +323,8 @@ th[scope="col"] {
 .alert-button {
   margin-top: 10px;
   padding: 8px 16px;
-  background: dodgerblue;
-  color: white;
+  background: #2e7d32;;
+  color: rgb(255, 252, 252);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -333,5 +333,7 @@ th[scope="col"] {
 }
 
 .alert-button:hover {
-  background: #1a73e8;
+  background: #1b5e20;
 }
+
+
