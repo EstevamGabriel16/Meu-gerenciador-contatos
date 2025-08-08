@@ -14,18 +14,18 @@ let contatos: Contato[] = [];
 let indiceEditando: number | null = null;
 
 // --------------------- Elementos ------------------
-const form          = document.getElementById("form-contato") as HTMLFormElement;
-const inputNome     = document.getElementById("nome") as HTMLInputElement;
-const inputContato  = document.getElementById("contato") as HTMLInputElement;
-const inputEmail    = document.getElementById("email") as HTMLInputElement;
-const selectStatus  = document.getElementById("status") as HTMLSelectElement;
-const modal         = document.getElementById("form-modal") as HTMLElement;
-const btnNovo = document.getElementById("btn-novo") as HTMLButtonElement;
-const btnCancelar = document.getElementById("btn-cancelar") as HTMLButtonElement;
-const tabela = document.getElementById("tabela-contatos") as HTMLTableSectionElement;
-const busca = document.getElementById("barra-pesquisa") as HTMLInputElement | null;
-const inputCategoria = document.getElementById("categoria") as HTMLInputElement;
-const btnExportar = document.getElementById("btn-exportar") as HTMLButtonElement;
+const form            = document.getElementById("form-contato")     as HTMLFormElement;
+const inputNome       = document.getElementById("nome")             as HTMLInputElement;
+const inputContato    = document.getElementById("contato")          as HTMLInputElement;
+const inputEmail      = document.getElementById("email")            as HTMLInputElement;
+const selectStatus    = document.getElementById("status")           as HTMLSelectElement;
+const modal           = document.getElementById("form-modal")       as HTMLElement;
+const btnNovo         = document.getElementById("btn-novo")         as HTMLButtonElement;
+const btnCancelar     = document.getElementById("btn-cancelar")     as HTMLButtonElement;
+const tabela          = document.getElementById("tabela-contatos")  as HTMLTableSectionElement;
+const busca           = document.getElementById("barra-pesquisa")   as HTMLInputElement | null;
+const inputCategoria  = document.getElementById("categoria")        as HTMLInputElement;
+const btnExportar     = document.getElementById("btn-exportar")     as HTMLButtonElement;
 
 // Utilidades
 const salvarNoLocalStorage = () => {
