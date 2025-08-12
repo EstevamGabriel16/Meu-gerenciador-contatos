@@ -16,8 +16,8 @@ class Contato {
 // =======================
 // Estado da aplicação
 // =======================
-let contatos = []; // Lista de todos os contatos
-let indiceEditando = null; // Guarda o índice de um contato em edição
+let contatos = []; // Lista de contatos
+let indiceEditando = null; // Índice do contato que está sendo editado
 // =======================
 // Seleção de elementos HTML
 // =======================
@@ -36,25 +36,25 @@ const btnExportar = document.getElementById("btn-exportar");
 // =======================
 // Funções de persistência
 // =======================
-// Salva a lista de contatos no navegador
+// Salva contatos no localStorage
 const salvarNoLocalStorage = () => {
     localStorage.setItem("contatos", JSON.stringify(contatos));
 };
-// Carrega a lista de contatos do navegador
+// Carrega contatos do localStorage
 const carregarDoLocalStorage = () => {
     const dados = localStorage.getItem("contatos");
     if (dados)
         contatos = JSON.parse(dados);
 };
 // =======================
-// Função utilitária: validar e-mail
+// Valida e-mail com regex
 // =======================
 const validarEmail = (email) => {
     const re = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     return re.test(email);
 };
 // =======================
-// Ordena contatos por nome (ignora acentos)
+// Ordena contatos pelo nome (ignora maiúsculas e acentos)
 // =======================
 function ordenarContatos() {
     contatos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
@@ -62,7 +62,7 @@ function ordenarContatos() {
 // =======================
 // Eventos de UI
 // =======================
-// Abrir modal de novo contato
+// Abrir modal para novo contato
 btnNovo.onclick = () => {
     indiceEditando = null;
     form.reset();
@@ -77,28 +77,27 @@ btnCancelar.onclick = () => {
 // Salvar contato (novo ou edição)
 form.onsubmit = e => {
     e.preventDefault();
-    // Pega os valores digitados
     const nome = inputNome.value.trim();
     const contato = inputContato.value.trim();
     const email = inputEmail.value.trim();
     const status = selectStatus.value;
     const categoria = inputCategoria.value.trim();
-    // Valida campos obrigatórios
+    // Validação básica dos campos obrigatórios
     if (!nome || !contato || !email) {
         showAlert("Preencha todos os campos!");
         return;
     }
-    // Valida formato de e-mail
+    // Valida formato do e-mail
     if (!validarEmail(email)) {
         showAlert("Por favor, insira um e-mail válido!");
         return;
     }
-    // Valida que contato é apenas números
+    // Valida que contato contém só números
     if (!/^\d+$/.test(contato)) {
         showAlert("Por favor, insira apenas números no campo de contato!");
         return;
     }
-    // Cria o objeto contato
+    // Cria novo contato
     const novoContato = new Contato(nome, contato, email, status, categoria);
     // Evita números duplicados
     if (indiceEditando === null) {
@@ -106,7 +105,7 @@ form.onsubmit = e => {
             showAlert("Este número já está cadastrado!");
             return;
         }
-        contatos.push(novoContato); // Novo contato
+        contatos.push(novoContato); // Adiciona novo contato
     }
     else {
         if (contatos.some((c, i) => c.contato === contato && i !== indiceEditando)) {
@@ -116,7 +115,6 @@ form.onsubmit = e => {
         contatos[indiceEditando] = novoContato; // Atualiza contato existente
         indiceEditando = null;
     }
-    // Salva, ordena e atualiza tabela
     ordenarContatos();
     salvarNoLocalStorage();
     modal.classList.add("oculto");
@@ -133,7 +131,7 @@ function atualizarTabela(lista = contatos) {
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>${c.status === "bloqueado" ? "🔒 bloqueado" : "✅ desbloqueado"}</td>
         <td>${c.categoria}</td>
         <td>
           <button class="editar" data-i="${index}">✏️</button>
@@ -145,22 +143,34 @@ function atualizarTabela(lista = contatos) {
     // Botões de edição
     tabela.querySelectorAll("button.editar").forEach(btn => {
         btn.addEventListener('click', () => {
-            const index = parseInt(btn.getAttribute('data-i') || '0');
+            const dataIndex = btn.getAttribute('data-i');
+            if (!dataIndex)
+                return; // Se não tiver índice, ignora
+            const index = parseInt(dataIndex);
+            if (isNaN(index))
+                return; // Se índice inválido, ignora
             editarContato(index);
         });
     });
     // Botões de exclusão
     tabela.querySelectorAll("button.apagar").forEach(btn => {
         btn.addEventListener('click', () => {
-            const index = parseInt(btn.getAttribute('data-i') || '0');
+            const dataIndex = btn.getAttribute('data-i');
+            if (!dataIndex)
+                return;
+            const index = parseInt(dataIndex);
+            if (isNaN(index))
+                return;
             apagarContato(index);
         });
     });
 }
 // =======================
-// Editar um contato existente
+// Editar contato - valida índice
 // =======================
 function editarContato(i) {
+    if (i < 0 || i >= contatos.length)
+        return; // Evita erro com índice inválido
     const c = contatos[i];
     inputNome.value = c.nome;
     inputContato.value = c.contato;
@@ -171,9 +181,11 @@ function editarContato(i) {
     modal.classList.remove("oculto");
 }
 // =======================
-// Apagar um contato
+// Apagar contato - valida índice
 // =======================
 function apagarContato(i) {
+    if (i < 0 || i >= contatos.length)
+        return; // Evita erro com índice inválido
     if (confirm(`Deseja apagar o contato "${contatos[i].nome}"?`)) {
         contatos.splice(i, 1);
         salvarNoLocalStorage();
@@ -183,19 +195,20 @@ function apagarContato(i) {
 // =======================
 // Pesquisa em tempo real
 // =======================
-busca.addEventListener('input', () => {
-    const termo = busca.value.toLowerCase().trim();
-    const resultados = termo
-        ? contatos.filter(c => c.nome.toLowerCase().includes(termo) ||
-            c.contato.includes(termo) ||
-            c.email.toLowerCase().includes(termo) ||
-            c.status.toLowerCase().includes(termo) ||
-            c.categoria.toLowerCase().includes(termo))
-        : contatos;
-    atualizarTabela(resultados);
-});
+if (busca) {
+    busca.addEventListener('input', () => {
+        const termo = busca.value.toLowerCase().trim();
+        const resultados = termo
+            ? contatos.filter(c => c.nome.toLowerCase().includes(termo) ||
+                c.contato.includes(termo) ||
+                c.email.toLowerCase().includes(termo) ||
+                c.categoria.toLowerCase().includes(termo))
+            : contatos;
+        atualizarTabela(resultados);
+    });
+}
 // =======================
-// Exportar lista para CSV
+// Exportar lista para CSV (com campo garantido como string)
 // =======================
 btnExportar.addEventListener('click', () => {
     if (contatos.length === 0) {
@@ -204,9 +217,17 @@ btnExportar.addEventListener('click', () => {
     }
     const csv = [
         ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria'],
-        ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria])
+        ...contatos.map(c => [
+            c.nome,
+            `="${c.contato}"`, // <-- mantém o formato no Excel
+            c.email,
+            c.status,
+            c.categoria
+        ])
     ]
-        .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
+        .map(row => row
+        .map(field => `"${String(field).replace(/"/g, '""')}"`) // Garante que campo é string e escapa aspas
+        .join(';'))
         .join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -225,7 +246,7 @@ function showAlert(mensagem) {
     const message = document.getElementById('alertMessage');
     const closeBtn = document.getElementById('alertClose');
     if (!alertDiv || !message || !closeBtn) {
-        alert(mensagem); // fallback se o elemento não existir
+        alert(mensagem); // fallback se os elementos não existirem
         return;
     }
     message.textContent = mensagem;

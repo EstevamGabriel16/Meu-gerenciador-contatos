@@ -148,7 +148,7 @@ function atualizarTabela(lista: Contato[] = contatos): void {
         <td>${c.nome}</td>
         <td>${c.contato}</td>
         <td>${c.email}</td>
-        <td>${c.status === "bloqueado" ? "🔒 Bloqueado" : "✅ Desbloqueado"}</td>
+        <td>${c.status === "bloqueado" ? "🔒 bloqueado" : "✅ desbloqueado"}</td>
         <td>${c.categoria}</td>
         <td>
           <button class="editar" data-i="${index}">✏️</button>
@@ -221,7 +221,6 @@ if (busca) {
           c.nome.toLowerCase().includes(termo) ||
           c.contato.includes(termo) ||
           c.email.toLowerCase().includes(termo) ||
-          c.status.toLowerCase().includes(termo) ||
           c.categoria.toLowerCase().includes(termo)
         )
       : contatos;
@@ -240,12 +239,18 @@ btnExportar.addEventListener('click', () => {
 
   const csv = [
     ['Nome', 'Contato', 'E-mail', 'Status', 'Categoria'],
-    ...contatos.map(c => [c.nome, c.contato, c.email, c.status, c.categoria])
+    ...contatos.map(c => [c.nome,
+`="${c.contato}"`, // <-- mantém o formato no Excel
+  c.email,
+  c.status,
+  c.categoria
+])
+
   ]
     .map(row =>
       row
         .map(field => `"${String(field).replace(/"/g, '""')}"`) // Garante que campo é string e escapa aspas
-        .join(',')
+        .join(';')
     )
     .join('\n');
 
